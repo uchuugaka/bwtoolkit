@@ -39,8 +39,8 @@
 
 - (void)encodeWithCoder:(NSCoder*)coder
 {	
-	NSWindowController *tempSheetController = [[[NSWindowController alloc] initWithWindow:sheet] autorelease];
-	NSWindowController *tempParentWindowController = [[[NSWindowController alloc] initWithWindow:parentWindow] autorelease];
+	NSWindowController *tempSheetController = [[NSWindowController alloc] initWithWindow:sheet];
+	NSWindowController *tempParentWindowController = [[NSWindowController alloc] initWithWindow:parentWindow];
 	
 	[coder encodeObject:tempSheetController forKey:@"BWSCSheet"];
 	[coder encodeObject:tempParentWindowController forKey:@"BWSCParentWindow"];
@@ -60,15 +60,15 @@
 
 - (IBAction)messageDelegateAndCloseSheet:(id)sender
 {
-	if (delegate != nil && [delegate respondsToSelector:@selector(shouldCloseSheet:)])
-	{	
-		if ([delegate performSelector:@selector(shouldCloseSheet:) withObject:sender])	
-			[self closeSheet:self];
-	}
-	else
-	{
+//	if (delegate != nil && [delegate respondsToSelector:@selector(shouldCloseSheet:)])
+//	{	
+//		if ([delegate performSelector:@selector(shouldCloseSheet:) withObject:sender])	
+//			[self closeSheet:self];
+//	}
+//	else
+//	{
 		[self closeSheet:self];
-	}
+//	}
 }
 
 

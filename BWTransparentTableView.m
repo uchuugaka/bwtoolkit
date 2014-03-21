@@ -21,9 +21,9 @@ static NSColor *rowColor, *altRowColor, *highlightColor;
 
 + (void)initialize;
 {
-    rowColor			= [[NSColor colorWithCalibratedWhite:0.13 alpha:0.855] retain];
-    altRowColor			= [[NSColor colorWithCalibratedWhite:0.16 alpha:0.855] retain];
-	highlightColor		= [[NSColor colorWithCalibratedWhite:(75.0 / 255.0) alpha:0.855] retain];
+    rowColor			= [NSColor colorWithCalibratedWhite:0.13 alpha:0.855];
+    altRowColor			= [NSColor colorWithCalibratedWhite:0.16 alpha:0.855];
+	highlightColor		= [NSColor colorWithCalibratedWhite:(75.0 / 255.0) alpha:0.855];
 }
 
 - (void)addTableColumn:(NSTableColumn *)aColumn
@@ -74,10 +74,11 @@ static NSColor *rowColor, *altRowColor, *highlightColor;
 {
 	NSRange			aVisibleRowIndexes = [self rowsInRect:theClipRect];
 	NSIndexSet *	aSelectedRowIndexes = [self selectedRowIndexes];
-	int				aRow = aVisibleRowIndexes.location;
-	int				anEndRow = aRow + aVisibleRowIndexes.length;
+	NSUInteger		aRow = aVisibleRowIndexes.location;
+	NSUInteger		anEndRow = aRow + aVisibleRowIndexes.length;
 
-    for (aRow; aRow < anEndRow; aRow++)
+		// TODO: clean up this oddball.
+    for (/*aRow*/; aRow < anEndRow; aRow++)
     {
 		if([aSelectedRowIndexes containsIndex:aRow])
 		{
@@ -91,7 +92,7 @@ static NSColor *rowColor, *altRowColor, *highlightColor;
 			NSColor *startColor = [NSColor colorWithCalibratedWhite:(85.0 / 255.0) alpha:0.855];
 			NSColor *endColor = [NSColor colorWithCalibratedWhite:(70.0 / 255.0) alpha:0.855];
 			
-			NSGradient *gradient = [[[NSGradient alloc] initWithStartingColor:startColor endingColor:endColor] autorelease];
+			NSGradient *gradient = [[NSGradient alloc] initWithStartingColor:startColor endingColor:endColor];
 			
 			[gradient drawInRect:aRowRect angle:90];
 			

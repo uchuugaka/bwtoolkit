@@ -12,10 +12,11 @@
 
 + (BOOL)bwIsOnLeopard 
 {
-	SInt32 minorVersion, majorVersion;
-	Gestalt(gestaltSystemVersionMajor, &majorVersion);
-	Gestalt(gestaltSystemVersionMinor, &minorVersion);
-	return majorVersion == 10 && minorVersion == 5;
+//	SInt32 minorVersion, majorVersion;
+//	Gestalt(gestaltSystemVersionMajor, &majorVersion);
+//	Gestalt(gestaltSystemVersionMinor, &minorVersion);
+//	return majorVersion == 10 && minorVersion == 5;
+	return NO;
 }
 
 @end

@@ -27,7 +27,7 @@
 @property (strong) NSMutableDictionary *resizableSubviewPreferredProportion, *nonresizableSubviewPreferredSize;
 @property (strong) NSArray *stateForLastPreferredCalculations;
 @property (strong) NSButton *toggleCollapseButton;
-@property (assign) id secondaryDelegate;
+@property (unsafe_unretained) id secondaryDelegate;
 @property (nonatomic) BOOL collapsibleSubviewCollapsed;
 @property int collapsiblePopupSelection;
 @property BOOL dividerCanCollapse;

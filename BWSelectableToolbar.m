@@ -27,11 +27,11 @@ static NSToolbar *editableToolbar;
 - (void)setItemSelectors;
 - (void)initialSetup;
 - (void)toggleActiveView:(id)sender;
-- (NSString *)identifierAtIndex:(int)index;
-- (void)switchToItemAtIndex:(int)anIndex animate:(BOOL)flag;
-- (int)toolbarIndexFromSelectableIndex:(int)selectableIndex;
+- (NSString *)identifierAtIndex:(NSUInteger)index;
+- (void)switchToItemAtIndex:(NSUInteger)anIndex animate:(BOOL)flag;
+- (NSUInteger)toolbarIndexFromSelectableIndex:(NSUInteger)selectableIndex;
 - (void)selectInitialItem;
-- (void)selectItemAtIndex:(int)anIndex;
+- (void)selectItemAtIndex:(NSUInteger)anIndex;
 // IBDocument methods
 - (void)addObject:(id)object toParent:(id)parent;
 - (void)moveObject:(id)object toParent:(id)parent;
@@ -42,48 +42,47 @@ static NSToolbar *editableToolbar;
 @end
 
 @interface BWSelectableToolbar ()
-@property (retain) BWSelectableToolbarHelper *helper;
-@property (readonly) NSMutableArray *labels;
-@property (copy) NSMutableDictionary *enabledByIdentifier;
-@property BOOL isPreferencesToolbar;
+@property (strong) BWSelectableToolbarHelper *helper;
+@property (weak, readonly) NSMutableArray *labels;
+@property (nonatomic, copy) NSMutableDictionary *enabledByIdentifier;
+//@property BOOL isPreferencesToolbar;
 @end
 
 @implementation BWSelectableToolbar
 
 @synthesize helper;
-@synthesize isPreferencesToolbar;
+//@synthesize isPreferencesToolbar;
 @synthesize enabledByIdentifier;
 
 - (BWSelectableToolbar *)documentToolbar
 {
-	return [[documentToolbar retain] autorelease];
+	return documentToolbar;
 }
 
 - (void)setDocumentToolbar:(BWSelectableToolbar *)obj
 {
-	[documentToolbar release];
-	documentToolbar = [obj retain];
+	documentToolbar = obj;
 }
 
 - (NSToolbar *)editableToolbar
 {
-	if ([self respondsToSelector:@selector(ibDidAddToDesignableDocument:)] == NO)
+//	if ([self respondsToSelector:@selector(ibDidAddToDesignableDocument:)] == NO)
 		return self;
 	
-	return [[editableToolbar retain] autorelease];
+//	return [[editableToolbar retain] autorelease];
 }
 
 - (void)setEditableToolbar:(NSToolbar *)obj
 {
-	if ([self respondsToSelector:@selector(ibDidAddToDesignableDocument:)])
-	{
+//	if ([self respondsToSelector:@selector(ibDidAddToDesignableDocument:)])
+//	{
 //		NSLog(@"--self: %@",self);
 //		NSLog(@"--editable toolbar is: %@",editableToolbar);
 //		NSLog(@"--setting editable toolbar to: %@",obj);
 
-		[editableToolbar release];
-		editableToolbar = [obj retain];
-	}
+//		[editableToolbar release];
+//		editableToolbar = [obj retain];
+//	}
 
 }
 
@@ -93,7 +92,7 @@ static NSToolbar *editableToolbar;
 	{
 		[self setDocumentToolbar:[decoder decodeObjectForKey:@"BWSTDocumentToolbar"]];
 		[self setHelper:[decoder decodeObjectForKey:@"BWSTHelper"]];
-		isPreferencesToolbar = [decoder decodeBoolForKey:@"BWSTIsPreferencesToolbar"];
+		_isPreferencesToolbar = [decoder decodeBoolForKey:@"BWSTIsPreferencesToolbar"];
 		[self setEnabledByIdentifier:[decoder decodeObjectForKey:@"BWSTEnabledByIdentifier"]];
 		
 //		NSLog(@"init with coder. helper decoded: %@", helper);
@@ -105,10 +104,10 @@ static NSToolbar *editableToolbar;
 {
     [super encodeWithCoder:coder];
 	
-	[coder encodeObject:[self documentToolbar] forKey:@"BWSTDocumentToolbar"];
-	[coder encodeObject:[self helper] forKey:@"BWSTHelper"];
-	[coder encodeBool:isPreferencesToolbar forKey:@"BWSTIsPreferencesToolbar"];
-	[coder encodeObject:[self enabledByIdentifier] forKey:@"BWSTEnabledByIdentifier"];
+	[coder encodeObject:self.documentToolbar forKey:@"BWSTDocumentToolbar"];
+	[coder encodeObject:self.helper forKey:@"BWSTHelper"];
+	[coder encodeBool:self.isPreferencesToolbar forKey:@"BWSTIsPreferencesToolbar"];
+	[coder encodeObject:self.enabledByIdentifier forKey:@"BWSTEnabledByIdentifier"];
 	
 //	NSLog(@"encode with coder. helper encoded: %@",helper);
 }
@@ -151,8 +150,8 @@ static NSToolbar *editableToolbar;
 
 - (void)awakeFromNib
 {
-	if ([self respondsToSelector:@selector(ibDidAddToDesignableDocument:)] == NO)
-	{
+//	if ([self respondsToSelector:@selector(ibDidAddToDesignableDocument:)] == NO)
+//	{
 		inIB = NO;
 		
 		if ([helper isPreferencesToolbar])
@@ -162,12 +161,12 @@ static NSToolbar *editableToolbar;
 		}
 		
 		[self performSelector:@selector(selectInitialItem) withObject:nil afterDelay:0];
-	}
+//	}
 }
 
 - (void)selectFirstItem
 {
-	int toolbarIndex = [self toolbarIndexFromSelectableIndex:0];
+	NSUInteger toolbarIndex = [self toolbarIndexFromSelectableIndex:0];
 	[self switchToItemAtIndex:toolbarIndex animate:NO];
 }
 
@@ -175,7 +174,7 @@ static NSToolbar *editableToolbar;
 {
 	// When the window launches, we want to select the toolbar item that was previously selected.
 	// So we have to find the toolbar index for our saved selected identifier.
-	int toolbarIndex;
+	NSUInteger toolbarIndex;
 	
 	if ([helper selectedIdentifier] != nil)
 		toolbarIndex = [itemIdentifiers indexOfObject:[helper selectedIdentifier]];
@@ -244,19 +243,19 @@ static NSToolbar *editableToolbar;
 	if ([self isMemberOfClass:NSClassFromString(@"IBEditableBWSelectableToolbar")])
 	{
 		// When the toolbar is initially dragged onto the canvas, record the content view and size of the window		
-		NSMutableDictionary *tempCVBI = [[[helper contentViewsByIdentifier] mutableCopy] autorelease];
+		NSMutableDictionary *tempCVBI = [[helper contentViewsByIdentifier] mutableCopy];
 		[tempCVBI setObject:[[[self editableToolbar] _window] contentView] forKey:[helper selectedIdentifier]];
 		[helper setContentViewsByIdentifier:tempCVBI];
 		
-		NSMutableDictionary *tempWSBI = [[[helper windowSizesByIdentifier] mutableCopy] autorelease];	
+		NSMutableDictionary *tempWSBI = [[helper windowSizesByIdentifier] mutableCopy];	
 		[tempWSBI setObject:[NSValue valueWithSize:[[[self editableToolbar] _window] frame].size] forKey:[helper selectedIdentifier]];
 		[helper setWindowSizesByIdentifier:tempWSBI];
 	}
 }
 
-- (int)toolbarIndexFromSelectableIndex:(int)selectableIndex
+- (NSUInteger)toolbarIndexFromSelectableIndex:(NSUInteger)selectableIndex
 {
-	NSMutableArray *selectableItems = [[[NSMutableArray alloc] init] autorelease];
+	NSMutableArray *selectableItems = [[NSMutableArray alloc] init];
 	
 	for (NSToolbarItem *currentItem in [[self editableToolbar] items]) 
 	{
@@ -273,13 +272,13 @@ static NSToolbar *editableToolbar;
 	
 	NSString *item = [selectableItems objectAtIndex:selectableIndex];
 	
-	int toolbarIndex = [[[self editableToolbar] items] indexOfObject:item];
+	NSUInteger toolbarIndex = [[[self editableToolbar] items] indexOfObject:item];
 	
 	return toolbarIndex;
 }
 
 // Tells the toolbar to draw the selection behind the toolbar item and records the selected item identifier
-- (void)selectItemAtIndex:(int)anIndex
+- (void)selectItemAtIndex:(NSUInteger)anIndex
 {
 	NSArray *toolbarItems = self.items;
 	
@@ -316,7 +315,7 @@ static NSToolbar *editableToolbar;
 	}
 }
 
-- (NSString *)identifierAtIndex:(int)index
+- (NSString *)identifierAtIndex:(NSUInteger)index
 {
 	NSToolbarItem *item;
 	NSString *newIdentifier = nil;
@@ -333,11 +332,6 @@ static NSToolbar *editableToolbar;
 	[[NSNotificationCenter defaultCenter] removeObserver:self
 													name:NSWindowDidResizeNotification
 												  object:[[self editableToolbar] _window]];
-	[itemIdentifiers release];
-	[itemsByIdentifier release];
-	[enabledByIdentifier release];
-	[helper release];
-    [super dealloc];
 }
 
 #pragma mark Public Methods
@@ -372,7 +366,7 @@ static NSToolbar *editableToolbar;
 
 - (void)setEnabled:(BOOL)flag forIdentifier:(NSString *)itemIdentifier
 {
-	NSMutableDictionary *enabledDict = [[[self enabledByIdentifier] mutableCopy] autorelease];
+	NSMutableDictionary *enabledDict = [[self enabledByIdentifier] mutableCopy];
 	
 	[enabledDict setObject:[NSNumber numberWithBool:flag] forKey:itemIdentifier];
 	
@@ -383,16 +377,16 @@ static NSToolbar *editableToolbar;
 
 - (BOOL)validateToolbarItem:(NSToolbarItem *)theItem
 {
-	if ([self respondsToSelector:@selector(ibDidAddToDesignableDocument:)] == NO)
-	{
-		NSString *identifier = [theItem itemIdentifier];		
+//	if ([self respondsToSelector:@selector(ibDidAddToDesignableDocument:)] == NO)
+//	{
+		NSString *identifier = [theItem itemIdentifier];
 		
 		if ([[self enabledByIdentifier] objectForKey:identifier] != nil)
 		{
 			if ([[[self enabledByIdentifier] objectForKey:identifier] boolValue] == NO)
 				return NO;
 		}
-	}
+//	}
 	
 	return YES;
 }
@@ -402,7 +396,7 @@ static NSToolbar *editableToolbar;
 	if (enabledByIdentifier == nil)
 		enabledByIdentifier = [NSMutableDictionary new];
 	
-    return [[enabledByIdentifier retain] autorelease]; 
+    return enabledByIdentifier; 
 }
 
 #pragma mark NSWindow notifications
@@ -415,7 +409,7 @@ static NSToolbar *editableToolbar;
 	
 	if ([helper selectedIdentifier])
 	{
-		NSMutableDictionary *tempWSBI = [[[helper windowSizesByIdentifier] mutableCopy] autorelease];	
+		NSMutableDictionary *tempWSBI = [[helper windowSizesByIdentifier] mutableCopy];	
 		[tempWSBI setObject:sizeValue forKey:key];
 		[helper setWindowSizesByIdentifier:tempWSBI];
 	}
@@ -447,7 +441,7 @@ static NSToolbar *editableToolbar;
 
 - (NSArray *)selectableItemIdentifiers
 {
-	NSMutableArray *selectableItemIdentifiers = [[[NSMutableArray alloc] init] autorelease];
+	NSMutableArray *selectableItemIdentifiers = [[NSMutableArray alloc] init];
 	
 	if ([self editableToolbar] != nil)
 	{
@@ -481,8 +475,9 @@ static NSToolbar *editableToolbar;
 
 - (void)setIsPreferencesToolbar:(BOOL)flag
 {
+		// FIXME: more retarded stuff here.
 	[helper setIsPreferencesToolbar:flag];
-	isPreferencesToolbar = flag;
+	_isPreferencesToolbar = flag;
 	
 	if (flag)
 	{
@@ -528,7 +523,7 @@ static NSToolbar *editableToolbar;
 	return labelArray;
 }
 
-- (int)selectedIndex
+- (NSUInteger)selectedIndex
 {
 	// The actual selected index can change on us (for instance, when the user re-orders toolbar items). So we need to figure it out dynamically, based on the selected identifier.
 	if ([[helper selectedIdentifier] isEqualToString:@""])
@@ -547,7 +542,7 @@ static NSToolbar *editableToolbar;
 
 #pragma mark Selection Switching
 
-- (void)switchToItemAtIndex:(int)anIndex animate:(BOOL)shouldAnimate
+- (void)switchToItemAtIndex:(NSUInteger)anIndex animate:(BOOL)shouldAnimate
 {	
 	NSString *oldIdentifier = [helper selectedIdentifier];
 	
@@ -558,12 +553,12 @@ static NSToolbar *editableToolbar;
 	[[[self editableToolbar] _window] makeFirstResponder:nil];
 	
 	// Make a new container view and add it to the IB document
-	NSView *containerView = [[[NSView alloc] initWithFrame:[[[[self editableToolbar] _window] contentView] frame]] autorelease];
+	NSView *containerView = [[NSView alloc] initWithFrame:[[[[self editableToolbar] _window] contentView] frame]];
 	if (inIB)
 		[self addObject:containerView toParent:[self parentOfObject:self]];
 	
 	// Move the subviews from the content view to the container view
-	NSArray *oldSubviews = [[[[[[self editableToolbar] _window] contentView] subviews] copy] autorelease];
+	NSArray *oldSubviews = [[[[[self editableToolbar] _window] contentView] subviews] copy];
 	for (NSView *view in oldSubviews)
 	{
 		if (inIB)
@@ -572,12 +567,12 @@ static NSToolbar *editableToolbar;
 	}
 	
 	// Store the container view and window size in the dictionaries
-	NSMutableDictionary *tempCVBI = [[[helper contentViewsByIdentifier] mutableCopy] autorelease];
+	NSMutableDictionary *tempCVBI = [[helper contentViewsByIdentifier] mutableCopy];
 	[tempCVBI setObject:containerView forKey:oldIdentifier];
 	[helper setContentViewsByIdentifier:tempCVBI];
 	
 	NSSize oldWindowSize = [[[self editableToolbar] _window] frame].size;
-	NSMutableDictionary *tempWSBI = [[[helper windowSizesByIdentifier] mutableCopy] autorelease];
+	NSMutableDictionary *tempWSBI = [[helper windowSizesByIdentifier] mutableCopy];
 	[tempWSBI setObject:[NSValue valueWithSize:oldWindowSize] forKey:oldIdentifier];
 	[helper setWindowSizesByIdentifier:tempWSBI];
 
@@ -592,11 +587,11 @@ static NSToolbar *editableToolbar;
 		// Record the new tab content view and window size
 		if (inIB)
 		{
-			NSMutableDictionary *tempCVBI = [[[helper contentViewsByIdentifier] mutableCopy] autorelease];
+			NSMutableDictionary *tempCVBI = [[helper contentViewsByIdentifier] mutableCopy];
 			[tempCVBI setObject:[[[self editableToolbar] _window] contentView] forKey:newIdentifier];
 			[helper setContentViewsByIdentifier:tempCVBI];
 			
-			NSMutableDictionary *tempWSBI = [[[helper windowSizesByIdentifier] mutableCopy] autorelease];	
+			NSMutableDictionary *tempWSBI = [[helper windowSizesByIdentifier] mutableCopy];	
 			[tempWSBI setObject:[NSValue valueWithSize:[[[self editableToolbar] _window] frame].size] forKey:newIdentifier];
 			[helper setWindowSizesByIdentifier:tempWSBI];
 		}
@@ -607,7 +602,7 @@ static NSToolbar *editableToolbar;
 		NSSize windowSize = [[[helper windowSizesByIdentifier] objectForKey:newIdentifier] sizeValue];
 		[[[self editableToolbar] _window] bwResizeToSize:windowSize animate:shouldAnimate];
 
-		NSArray *newSubviews = [[[[[helper contentViewsByIdentifier] objectForKey:newIdentifier] subviews] copy] autorelease];
+		NSArray *newSubviews = [[[[helper contentViewsByIdentifier] objectForKey:newIdentifier] subviews] copy];
 		
 		if (newSubviews.count > 0 && newSubviews != nil)
 		{

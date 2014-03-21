@@ -14,17 +14,20 @@
 // for the key @"BWClickedItem" in the supplied userInfo dictionary.
 extern NSString * const BWSelectableToolbarItemClickedNotification;
 
-@interface BWSelectableToolbar : NSToolbar 
+@interface BWSelectableToolbar : NSToolbar <NSToolbarDelegate>
 {
 	BWSelectableToolbarHelper *helper;
 	NSMutableArray *itemIdentifiers;
 	NSMutableDictionary *itemsByIdentifier, *enabledByIdentifier;
 	BOOL inIB;
 	
+		// FIXME: probably not needed
 	// For the IB inspector
-	int selectedIndex;
-	BOOL isPreferencesToolbar;
+	NSUInteger selectedIndex;
+//	BOOL isPreferencesToolbar;
 }
+
+@property (nonatomic) BOOL isPreferencesToolbar;
 
 // Call one of these methods to set the active tab. 
 - (void)setSelectedItemIdentifier:(NSString *)itemIdentifier; // Use if you want an action in the tabbed window to change the tab.

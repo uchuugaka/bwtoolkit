@@ -42,6 +42,11 @@
      * The bestRepresentationForDevice: nil tells the NSImage to just
      * give us the raw image instead of it's wacky DPI-translated version.
      */
+		// use -[NSImage bestRepresentationForRect:context:hints:] instead.  Any deviceDescription dictionary is also a valid hints dictionary.
+	NSRect aRect = NSMakeRect(0, 0, existingSize.width, existingSize.height);
+		// BUild other then come back and see if this bogus.
+//	existingSize.width = [[existingImage bestRepresentationForRect:aRect context:nil hints:nil] pixelsWide];
+//	existingSize.height = [[existingImage bestRepresentationForRect:aRect context:nil hints:nil] pixelsHigh];
     existingSize.width = [[existingImage bestRepresentationForDevice:nil] pixelsWide];
     existingSize.height = [[existingImage bestRepresentationForDevice:nil] pixelsHigh];
 	

@@ -12,11 +12,14 @@
 
 + (NSString *)bwRandomUUID
 {
-	CFUUIDRef uuidObj = CFUUIDCreate(nil);
-	NSString *newUUID = (NSString*)CFMakeCollectable(CFUUIDCreateString(nil, uuidObj));
-	CFRelease(uuidObj);
+		// NOTE: changed to use NSUUID and comply with ARC.
+	NSString *aUUIDString = [[NSUUID UUID] UUIDString];
+		// TODO: remove old
+//	CFUUIDRef uuidObj = CFUUIDCreate(nil);
+//	NSString *newUUID = (__bridge NSString*)CFUUIDCreateString(nil, uuidObj);
+//	CFRelease(uuidObj);
 	
-	return [newUUID autorelease];
+	return aUUIDString;
 }
 
 @end

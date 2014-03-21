@@ -37,7 +37,7 @@
 
 - (void)openURLInBrowser:(id)sender
 {
-	if (![self respondsToSelector:@selector(ibDidAddToDesignableDocument:)])
+//	if (![self respondsToSelector:@selector(ibDidAddToDesignableDocument:)])
 		[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:self.urlString]];
 }
 
@@ -46,10 +46,5 @@
 	[self addCursorRect:[self bounds] cursor:[NSCursor pointingHandCursor]];
 }
 
-- (void)dealloc
-{
-	[urlString release];
-	[super dealloc];
-}
 
 @end

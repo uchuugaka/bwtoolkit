@@ -15,7 +15,7 @@
 {
     if ((self = [super initWithCoder:decoder]) != nil)
 	{
-		if ([self respondsToSelector:@selector(ibTester)] == NO)
+//		if ([self respondsToSelector:@selector(ibTester)] == NO)
 			[self setDrawsBackground:NO];
 	}
 	return self;
